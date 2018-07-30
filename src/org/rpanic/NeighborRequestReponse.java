@@ -13,11 +13,11 @@ import java.util.function.Consumer;
 
 public class NeighborRequestReponse implements Consumer<Socket>{
 
-	NeighborPool pool;
+	GroupedNeighborPool pool;
 	
 	List<Responser<String, Socket>> responser = new ArrayList<>();
 	
-	public NeighborRequestReponse(NeighborPool pool) {
+	public NeighborRequestReponse(GroupedNeighborPool pool) {
 		this.pool = pool;
 	}
 	
@@ -67,7 +67,7 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 					
 					TCPNeighbor n = new TCPNeighbor(s.getInetAddress());
 					n.setPort(recPort);
-					if(!pool.list.contains(n) && pool.list.size() < NeighborPool.MaxPoolSizeCheck) {
+					if(!pool.list.contains(n) && pool.list.size() < GroupedNeighborPool.MaxPoolSizeCheck) {
 						pool.list.add(n);
 						System.out.println("Pool " + pool.listeningPort + " Neighbor added port: " + n.tcpPort);
 					}
@@ -107,6 +107,10 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 				s.close();
 				writer = null;
 				break;
+				
+			case "shard":
+				writer = new OutputStreamWriter(s.getOutputStream());
+				writer.write("shard " + pool.getShardId()); 
 				
 			default:{
 				for(Responser<String, Socket> r : responser) {

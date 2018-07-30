@@ -17,7 +17,7 @@ public class Mian {
 		TCPNeighbor n = new TCPNeighbor(InetAddress.getByName("127.0.0.1"));
 		n.setPort(1337);
 		
-		NeighborPool pool = new NeighborPool(null, n, 1337);
+		GroupedNeighborPool pool = new GroupedNeighborPool(null, n, 1337, "0");
 		
 		ListenerThread.startListeningThreadTcp(1337, new NeighborRequestReponse(pool));
 		
@@ -26,7 +26,7 @@ public class Mian {
 		pool.init();
 		
 		List<TCPNeighbor> list = new ArrayList<>();
-		List<NeighborPool> pools = new ArrayList<>();
+		List<GroupedNeighborPool> pools = new ArrayList<>();
 		
 		pools.add(pool);
 		list.add(n);
@@ -52,7 +52,7 @@ public class Mian {
 			TCPNeighbor n2 = new TCPNeighbor(InetAddress.getByName("127.0.0.1"));
 			n2.setPort(1337 + i);
 			
-			NeighborPool pool2 = new NeighborPool(list.get(new Random().nextInt(list.size())), n2, 1337 + i);
+			GroupedNeighborPool pool2 = new GroupedNeighborPool(list.get(new Random().nextInt(list.size())), n2, 1337 + i, i + "");
 			
 			ListenerThread.startListeningThreadTcp(1337 + i, new NeighborRequestReponse(pool2));
 			
@@ -76,7 +76,7 @@ public class Mian {
 		
 		System.out.println("Read iterations: " + TCPNeighbor.iter);
 		
-		NetworkVisualizer.visualize(pools.toArray(new NeighborPool[pools.size()]));
+		NetworkVisualizer.visualize(pools.toArray(new GroupedNeighborPool[pools.size()]));
 		
 //		if(args.length > 0 && args[0].startsWith("s")){
 //			server();

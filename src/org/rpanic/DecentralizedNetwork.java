@@ -5,7 +5,7 @@ import java.net.UnknownHostException;
 
 public class DecentralizedNetwork {
 
-	private static NeighborPool pool;
+	private static GroupedNeighborPool pool;
 	
 	public static void init(String address, int port) {
 		
@@ -17,13 +17,13 @@ public class DecentralizedNetwork {
 			return;
 		}
 		entry.setPort(port);
-		pool = new NeighborPool(entry,null, 1337);
+		pool = new GroupedNeighborPool(entry,null, 1337, "0");
 		
 		pool.refillPoolIfNeeded();
 		
 	}
 	
-	public static NeighborPool getPool() {
+	public static GroupedNeighborPool getPool() {
 		return pool;
 	}
 	

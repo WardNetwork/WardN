@@ -7,11 +7,12 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
-public class NeighborPool {
+public class GroupedNeighborPool {
 
 	public volatile List<TCPNeighbor> list = new CopyOnWriteArrayList<>();
 	int listeningPort;
 	public TCPNeighbor self;
+	private String shardId;
 	
 	public static final int MaxNeighborPoolSize = 10;
 	public static final int MaxPoolSizeCheck = 10;
@@ -20,12 +21,13 @@ public class NeighborPool {
 	
 	//Constructor
 	
-	public NeighborPool(TCPNeighbor entryPoint, TCPNeighbor self, int listeningPort){
+	public GroupedNeighborPool(TCPNeighbor entryPoint, TCPNeighbor self, int listeningPort, String shardId){
 		
 		if(entryPoint != null)
 			list.add(entryPoint);
 		this.listeningPort = listeningPort;
 		this.self = self;
+		this.shardId = shardId;
 	}
 	
 	public void init() {
@@ -51,10 +53,10 @@ public class NeighborPool {
 			
 			String response = neighbor.send("dnn");
 			if(response == null) {
-//				if(neighbor.socket.isClosed()){
+//					if(neighbor.socket.isClosed()){
 					return null;
-//				}
-//				continue;
+//					}
+//					continue;
 			}
 			
 			if(response.startsWith("dnnRes ")) {
@@ -64,22 +66,29 @@ public class NeighborPool {
 					 return null;
 				}
 				
+//				arr = response.split(";");
+//				
+//				String foreignShardId = arr.length > 1 ? arr[1] : "undefined";
+//				
+//				if(foreignShardId.equals(shardId)){
+				
 				String[] arr = response.split(":");
-				
-				if(arr.length < 2){
-					return null;
-				}
-				
-				try {
-					TCPNeighbor zmq = new TCPNeighbor(InetAddress.getByName(arr[0]));
-	
-					zmq.setPort(Integer.parseInt(arr[1]));
-					return zmq;
 					
-				} catch (UnknownHostException e) {
-					e.printStackTrace();
+					if(arr.length < 2){
+						return null;
+					}
+					
+					try {
+						TCPNeighbor zmq = new TCPNeighbor(InetAddress.getByName(arr[0]));
+		
+						zmq.setPort(Integer.parseInt(arr[1]));
+						return zmq;
+						
+					} catch (UnknownHostException e) {
+						e.printStackTrace();
+					}
 				}
-			}
+			//}
 		}
 		
 		return null;
@@ -105,7 +114,7 @@ public class NeighborPool {
 	 */
 	public void startRefreshRoutine(){
 		
-//		list = Collections.synchronizedList(list);
+//			list = Collections.synchronizedList(list);
 		
 		new Thread(() -> {
 			while(true){  //TODO Ausschalten möglich machen
@@ -117,7 +126,7 @@ public class NeighborPool {
 					}
 					
 				}
-//				System.out.println("iter" + iter);
+//					System.out.println("iter" + iter);
 				
 				refillPoolIfNeeded();
 				
@@ -173,6 +182,10 @@ public class NeighborPool {
 			return list.get(new Random().nextInt(list.size()));
 		}
 		return null;
+	}
+	
+	public String getShardId(){
+		return shardId;
 	}
 	
 }

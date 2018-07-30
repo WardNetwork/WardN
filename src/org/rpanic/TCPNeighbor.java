@@ -60,6 +60,16 @@ public class TCPNeighbor {
 		
 	}
 	
+	public String getShardId(){
+		
+		String res = send("shard");
+		if(res.startsWith("shard ") && res.length() > 6 /* tests if after the whitespace there is something */){
+			return res.split(" ")[1];
+		}
+		return null;
+		
+	}
+	
 	public String send(String message) {
 		
 		message += " ;";

@@ -4,7 +4,7 @@ import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
-import org.rpanic.NeighborPool;
+import org.rpanic.GroupedNeighborPool;
 import org.rpanic.TCPNeighbor;
 
 import edu.uci.ics.jung.algorithms.layout.CircleLayout;
@@ -15,14 +15,14 @@ import edu.uci.ics.jung.visualization.decorators.ToStringLabeller;
 
 public class NetworkVisualizer {
 
-	public static void visualize(NeighborPool... pools) {
+	public static void visualize(GroupedNeighborPool... pools) {
 		Layout<String, String> layout;
 		BasicVisualizationServer<String,String> vv;
 		DirectedSparseMultigraph<String, String> g = new DirectedSparseMultigraph<>();
 		
 		System.out.println("Started parsing the edges...");
 		
-		for(NeighborPool pool : pools) {
+		for(GroupedNeighborPool pool : pools) {
 			
 			for(TCPNeighbor n : pool.list) {
 
