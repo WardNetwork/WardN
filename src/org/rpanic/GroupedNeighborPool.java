@@ -9,6 +9,8 @@ import java.util.concurrent.CopyOnWriteArrayList;
 
 public class GroupedNeighborPool {
 
+	//TODO noch nicht fertig, mitschicken der shardId usw. noch nicht implementiert
+	
 	public volatile List<TCPNeighbor> list = new CopyOnWriteArrayList<>();
 	int listeningPort;
 	public TCPNeighbor self;
@@ -32,9 +34,37 @@ public class GroupedNeighborPool {
 	
 	public void init() {
 		
+		list.forEach(n -> subscribeTo(n)); //Subscribe to entry Neighbour
+		
 		refillPoolIfNeeded();
 		
 		startRefreshRoutine();
+	}
+	
+	public void subscribeTo(TCPNeighbor n){ //TODO Not tested!!
+		
+		String res = n.send("addMe");
+		if(!res.equals("added")){
+			new Thread(() -> {
+				
+				boolean match = false;
+				while(!match){
+					
+					try {
+						Thread.sleep(1000L);
+					} catch (Exception e) {
+						e.printStackTrace();
+						System.out.println("Exiting AddingThread");
+						break;
+					}
+					
+					match = list.stream().anyMatch(x -> x.send("addMe").equals("added"));
+					
+				}
+				
+			}, "AddingThread").start();
+		}
+		
 	}
 	
 	//Pool Management

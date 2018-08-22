@@ -101,6 +101,7 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 				TCPNeighbor n = new TCPNeighbor(InetAddress.getByName(tokenized[1]));
 				n.setPort(Integer.parseInt(tokenized[2]));
 				pool.addNeighborManually(n);
+				n.send("added");
 				break;
 				
 			case "closeConn":

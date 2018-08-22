@@ -136,7 +136,7 @@ public class TCPNeighbor {
 		
 		if(obj instanceof TCPNeighbor){
 			TCPNeighbor n = (TCPNeighbor)obj;
-			return n.address.getHostAddress().equals(this.address.getHostAddress()) && n.tcpPort == this.tcpPort;
+			return n.address.getHostAddress().equalsIgnoreCase(this.address.getHostAddress()) && n.tcpPort == this.tcpPort;
 		}
 		
 		return super.equals(obj);
@@ -152,7 +152,7 @@ public class TCPNeighbor {
 
 	volatile Queue<String> queue = new LinkedList<>();
 	
-	public String send2(String s) {
+	public String sendQueue(String s) {
 		
 		queue.add(s);
 		
