@@ -98,10 +98,13 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 				break;
 				
 			case "addMe":
-				TCPNeighbor n = new TCPNeighbor(InetAddress.getByName(tokenized[1]));
-				n.setPort(Integer.parseInt(tokenized[2]));
+				System.out.println("Address.... : " + s.getInetAddress());
+				TCPNeighbor n = new TCPNeighbor(s.getInetAddress());
+				System.out.println("Port.... : " + tokenized[1]);
+				n.setPort(s.getLocalPort());
 				pool.addNeighborManually(n);
-				n.send("added");
+				writer = new OutputStreamWriter(s.getOutputStream());
+				writer.write("added");
 				break;
 				
 			case "closeConn":

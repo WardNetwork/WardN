@@ -16,8 +16,8 @@ public class GroupedNeighborPool {
 	public TCPNeighbor self;
 	private String shardId;
 	
-	public static final int MaxNeighborPoolSize = 10;
-	public static final int MaxPoolSizeCheck = 10;
+	public static final int MaxNeighborPoolSize = 20;
+	public static final int MaxPoolSizeCheck = 20;
 	
 	public List<String> recievedBroadcasts = new ArrayList<>(); //TODO Besser machen, besseres Konzept, vllt unique IDs vergeben
 	
@@ -43,8 +43,8 @@ public class GroupedNeighborPool {
 	
 	public void subscribeTo(TCPNeighbor n){ //TODO Not tested!!
 		
-		String res = n.send("addMe");
-		if(!res.equals("added")){
+		String res = n.send("addMe " + listeningPort);
+		if(res == null || !res.equals("added")){
 			new Thread(() -> {
 				
 				boolean match = false;
@@ -58,11 +58,14 @@ public class GroupedNeighborPool {
 						break;
 					}
 					
-					match = list.stream().anyMatch(x -> x.send("addMe").equals("added"));
+					match = list.stream().anyMatch(x -> x.send("addMe " + this.listeningPort).equals("added"));
 					
 				}
+				System.out.println("Added!");
 				
 			}, "AddingThread").start();
+		}else{
+			System.out.println("Added!");
 		}
 		
 	}
@@ -175,7 +178,8 @@ public class GroupedNeighborPool {
 	}
 	
 	public void addNeighborManually(TCPNeighbor n){
-		list.add(n);
+		if(!list.contains(n))
+			list.add(n);
 	}
 	
 	public boolean checkConnection(TCPNeighbor n) {
