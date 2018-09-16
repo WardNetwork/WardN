@@ -17,7 +17,7 @@ public class DecentralizedNetwork {
 			return;
 		}
 		entry.setPort(port);
-		pool = new GroupedNeighborPool(entry,null, 1337, "0");
+		pool = new GroupedNeighborPool(entry,null, 1337, 1);
 		
 		pool.refillPoolIfNeeded();
 		

@@ -14,7 +14,7 @@ public class GroupedNeighborPool {
 	public volatile List<TCPNeighbor> list = new CopyOnWriteArrayList<>();
 	int listeningPort;
 	public TCPNeighbor self;
-	private String shardId;
+	private long shardId;
 	
 	public static final int MaxNeighborPoolSize = 20;
 	public static final int MaxPoolSizeCheck = 20;
@@ -23,7 +23,7 @@ public class GroupedNeighborPool {
 	
 	//Constructor
 	
-	public GroupedNeighborPool(TCPNeighbor entryPoint, TCPNeighbor self, int listeningPort, String shardId){
+	public GroupedNeighborPool(TCPNeighbor entryPoint, TCPNeighbor self, int listeningPort, long shardId){
 		
 		if(entryPoint != null)
 			list.add(entryPoint);
