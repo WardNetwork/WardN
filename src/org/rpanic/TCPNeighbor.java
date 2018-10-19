@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
@@ -72,17 +73,44 @@ public class TCPNeighbor {
 		
 	}
 	
-	public String send(String message) {
+	public void sendVoid(String message) {
 		
 		message += " ;";
 		
-		if(socket == null)
+		if(socket == null || socket.isClosed())
 			openConnection();
 				
 		try {
 			
 			if(!socket.isConnected() || socket.isClosed()) {
 				Logger.error("Socket is not connected!");
+				Thread.dumpStack();
+			}
+			
+			OutputStreamWriter out = new OutputStreamWriter(socket.getOutputStream());
+			out.write(message);
+			out.flush();
+			
+			Logger.debug(Calendar.getInstance().get(Calendar.MILLISECOND) + "| SendingVoid: " + message);
+			
+		}catch(IOException e) {
+			e.printStackTrace();
+		}
+		
+	}
+	
+	public String send(String message) {
+		
+		message += " ;";
+		
+		if(socket == null || socket.isClosed())
+			openConnection();
+				
+		try {
+			
+			if(!socket.isConnected() || socket.isClosed()) {
+				Logger.error("Socket is not connected!");
+				Thread.dumpStack();
 				return null;
 			}
 			
@@ -91,16 +119,26 @@ public class TCPNeighbor {
 			out.flush();
 			
 			Logger.debug(Calendar.getInstance().get(Calendar.MILLISECOND) + "| Sending: " + message);
+			
 //			System.out.print("Sent: " + message);
 			
 			InputStream in = socket.getInputStream();
 			String reply = recieve(in);
 			Logger.debug(Calendar.getInstance().get(Calendar.MILLISECOND) + "| Recieved: " + reply);
 			
+			
 //			System.out.println(" Reply: " + reply);
 			
 //			socket.close();
 //			socket = null;
+			
+			if(reply != null){
+				if(reply.endsWith(";")){
+					reply = reply.substring(0, reply.length()-1).trim();
+				}else{
+					//TODO System.err.println("Reply ends not with semicolon, something is weird here! " + reply);
+				}
+			}
 			
 			return reply;
 			
