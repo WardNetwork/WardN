@@ -18,8 +18,8 @@ public class GroupedNeighborPool {
 	public TCPNeighbor self;
 	private long shardId;
 	
-	public static final int MaxNeighborPoolSize = 20;
-	public static final int MaxPoolSizeCheck = 20;
+	public static final int MaxNeighborPoolSize = 3;
+	public static final int MaxPoolSizeCheck = 3;
 	
 	public List<String> recievedBroadcasts = new ArrayList<>(); //TODO Besser machen, besseres Konzept, vllt unique IDs vergeben
 	
@@ -142,7 +142,7 @@ public class GroupedNeighborPool {
 		
 	}
 	
-	public static final long RefreshLoopSleep = 10000;
+	public static final long RefreshLoopSleep = 11000;
 	
 	/**
 	 * starts a Rountine which checks if all nodes are still responding
@@ -163,7 +163,7 @@ public class GroupedNeighborPool {
 				}
 //					System.out.println("iter" + iter);
 				
-				refillPoolIfNeeded();
+				//refillPoolIfNeeded();
 				
 				try {
 					Thread.sleep(RefreshLoopSleep);
@@ -172,11 +172,28 @@ public class GroupedNeighborPool {
 				}
 			}
 			
-		}).start();
+		});//TODO temp .start();
 		
 		//Nach 2 Minuten addMe an alle bekannten Nodes aussenden
 		
+	}
+	
+	public void switchToNewShardId(long shardId){
 		
+		this.shardId = shardId;
+		
+		for(TCPNeighbor n : list){
+			
+			String res = n.send("shard " + shardId);
+			if(!res.equals("shard " + shardId)){
+				list.remove(n);
+			}
+		}
+		refillPoolIfNeeded();
+	}
+	
+	public void removeNeighborManually(TCPNeighbor n){
+		list.remove(n);
 	}
 	
 	public void addNeighborManually(TCPNeighbor n){
@@ -206,7 +223,7 @@ public class GroupedNeighborPool {
 		for(TCPNeighbor n : list){
 			new Thread(() -> {
 				
-				n.send("br " + message);
+				n.sendVoid("br " + message);
 				
 			}).start();
 		}
@@ -220,7 +237,11 @@ public class GroupedNeighborPool {
 		return null;
 	}
 	
-	public String getShardId(){
+	public int getPort(){
+		return listeningPort;
+	}
+	
+	public long getShardId(){
 		return shardId;
 	}
 	

@@ -6,6 +6,7 @@ import java.io.OutputStreamWriter;
 import java.net.InetAddress;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
@@ -15,7 +16,7 @@ import org.pmw.tinylog.Logger;
 
 public class NeighborRequestReponse implements Consumer<Socket>{
 
-	GroupedNeighborPool pool;
+	public final GroupedNeighborPool pool;
 	
 	List<Responser<String, Socket>> responser = new ArrayList<>();
 	
@@ -31,7 +32,7 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 			try {
 				
 				if(s.isClosed()) {
-					System.out.println("Recieving Socket is closed!");
+					Logger.warn("Recieving Socket is closed!");
 					return;
 				}
 
@@ -46,8 +47,6 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 		}
 		
 	}
-	
-	static List<Integer> ports = new ArrayList<>(); //TODO DEBUG
 	
 	public synchronized void acceptResponse(Socket s, String request) throws IOException {
 		
@@ -95,17 +94,11 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 				respondToBroadcast(s, request);
 				break;
 				
-			//DEBUG
-			case "testBr":
-				ports.add(pool.listeningPort);
-				//DEBUG
-				break;
-				
 			case "addMe":
 				Logger.debug("Address.... : " + s.getInetAddress());
 				TCPNeighbor n = new TCPNeighbor(s.getInetAddress());
 				Logger.debug("Port.... : " + tokenized[1]);
-				n.setPort(s.getLocalPort());
+				n.setPort(Integer.parseInt(tokenized[1]));
 				pool.addNeighborManually(n);
 				Logger.debug("Added Neighbor " + n.toString() + " to pool " + pool.getPort());
 				writer = new OutputStreamWriter(s.getOutputStream());
@@ -118,11 +111,21 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 				break;
 				
 			case "shard":
+				if(tokenized.length > 1){
+					long shard = Long.parseLong(tokenized[1]);
+					if(shard != pool.getShardId()){
+						
+					}
+				}
 				writer = new OutputStreamWriter(s.getOutputStream());
 				writer.write("shard " + pool.getShardId()); 
 				
 			default:{
-				for(Responser<String, Socket> r : responser) {
+				List<Responser<String, Socket>> clone;
+				synchronized (responser) {
+					clone = new ArrayList<>(responser);
+				}
+				for(Responser<String, Socket> r : clone) {
 					if(r.acceptable(tokenized[0])) {
 						r.accept(request, s);
 					}
@@ -166,19 +169,28 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 		
 	}
 	
-	public void addResponser( Responser<String, Socket> responser) {
+	public synchronized void addResponser( Responser<String, Socket> responser) {
 //		for(Responser<String, Socket> r : responser) {
 			this.responser.add(responser);
 //		}
+	}
+	
+	public synchronized boolean removeResponser(Responser<String, Socket> responser) {
+		
+		for(int i = 0 ; i < this.responser.size() ; i++) {
+			Responser<String, Socket> r = this.responser.get(i);
+			if(r == responser) { //Check for reference Equality
+				this.responser.remove(i);
+				return true;
+			}
+		}
+		return false;
+		
 	}
 
 	private void respondToBroadcast(Socket t, String request) {
 		
 		if(request.startsWith("br ")){
-			
-//			if(pool.recievedBroadcasts.size() > 0) { //TODO Check ich nicht warum ich das geschrieben hab
-//				return;
-//			}
 
 			request = request.substring(3);
 			
@@ -186,7 +198,7 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 				return;
 			}
 			
-			pool.broadcast(request); 
+			pool.broadcast(request);  //TODO I think there is a duplicate Broadcast here - other one is NetworkDAG
 			
 			try {
 				acceptResponse(null, request);
