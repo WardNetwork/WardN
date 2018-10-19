@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Random;
 import java.util.concurrent.CopyOnWriteArrayList;
 
+import org.pmw.tinylog.Logger;
+
 public class GroupedNeighborPool {
 
 	//TODO noch nicht fertig, mitschicken der shardId usw. noch nicht implementiert
@@ -61,11 +63,11 @@ public class GroupedNeighborPool {
 					match = list.stream().anyMatch(x -> x.send("addMe " + this.listeningPort).equals("added"));
 					
 				}
-				System.out.println("Added!");
+				Logger.debug("Added!");
 				
 			}, "AddingThread").start();
 		}else{
-			System.out.println("Added!");
+			Logger.debug("Not Added!");
 		}
 		
 	}
@@ -199,7 +201,7 @@ public class GroupedNeighborPool {
 		
 		recievedBroadcasts.add(message);
 		
-		System.out.println("Broadcast: " + message + " from port " + listeningPort);
+		Logger.debug("Broadcast: " + message + " from port " + listeningPort);
 		
 		for(TCPNeighbor n : list){
 			new Thread(() -> {

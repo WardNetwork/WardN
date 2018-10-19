@@ -10,6 +10,8 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.function.Consumer;
 
+import org.pmw.tinylog.Logger;
+
 
 public class NeighborRequestReponse implements Consumer<Socket>{
 
@@ -49,6 +51,8 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 	
 	public synchronized void acceptResponse(Socket s, String request) throws IOException {
 		
+		Logger.debug("New Request: " + request);
+		
 		String[] tokenized = request.split(" ");
 		
 		OutputStreamWriter writer = null;
@@ -69,7 +73,7 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 					n.setPort(recPort);
 					if(!pool.list.contains(n) && pool.list.size() < GroupedNeighborPool.MaxPoolSizeCheck) {
 						pool.list.add(n);
-						System.out.println("Pool " + pool.listeningPort + " Neighbor added port: " + n.tcpPort);
+						Logger.debug("Pool " + pool.listeningPort + " Neighbor added port: " + n.tcpPort);
 					}
 				}
 				writer = new OutputStreamWriter(s.getOutputStream());
@@ -98,11 +102,12 @@ public class NeighborRequestReponse implements Consumer<Socket>{
 				break;
 				
 			case "addMe":
-				System.out.println("Address.... : " + s.getInetAddress());
+				Logger.debug("Address.... : " + s.getInetAddress());
 				TCPNeighbor n = new TCPNeighbor(s.getInetAddress());
-				System.out.println("Port.... : " + tokenized[1]);
+				Logger.debug("Port.... : " + tokenized[1]);
 				n.setPort(s.getLocalPort());
 				pool.addNeighborManually(n);
+				Logger.debug("Added Neighbor " + n.toString() + " to pool " + pool.getPort());
 				writer = new OutputStreamWriter(s.getOutputStream());
 				writer.write("added");
 				break;

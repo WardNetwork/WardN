@@ -5,6 +5,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.function.Consumer;
 
+import org.pmw.tinylog.Logger;
+
 public class ListenerThread {
 	
 	public static void startListeningThreadTcp(int port, Consumer<Socket> consumer){
@@ -15,12 +17,12 @@ public class ListenerThread {
 			try {
 				ss = new ServerSocket(port);
 			} catch (IOException e) {
-				System.out.println("Serversocket couldn´t be opened");
+				Logger.error("Serversocket couldn´t be opened. Port: " + port);
 				e.printStackTrace();
 				return;
 			}
 			
-			System.out.println("ListenerThread listening on port " + port + " and waiting for connection");
+			Logger.info("ListenerThread listening on port " + port + " and waiting for connection");
 			
 			while(!ss.isClosed()) {
 				

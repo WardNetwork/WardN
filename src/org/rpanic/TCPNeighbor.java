@@ -9,6 +9,8 @@ import java.util.LinkedList;
 import java.util.Queue;
 import java.util.Scanner;
 
+import org.pmw.tinylog.Logger;
+
 public class TCPNeighbor {
 	
 	public static final int timeOut = 5000;
@@ -80,7 +82,7 @@ public class TCPNeighbor {
 		try {
 			
 			if(!socket.isConnected() || socket.isClosed()) {
-				System.out.println("Socket is not connected!");
+				Logger.error("Socket is not connected!");
 				return null;
 			}
 			
@@ -88,10 +90,12 @@ public class TCPNeighbor {
 			out.write(message);
 			out.flush();
 			
+			Logger.debug(Calendar.getInstance().get(Calendar.MILLISECOND) + "| Sending: " + message);
 //			System.out.print("Sent: " + message);
 			
 			InputStream in = socket.getInputStream();
 			String reply = recieve(in);
+			Logger.debug(Calendar.getInstance().get(Calendar.MILLISECOND) + "| Recieved: " + reply);
 			
 //			System.out.println(" Reply: " + reply);
 			
